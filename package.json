@@ -26,7 +26,11 @@
     "watch": "webpack --mode development --watch"
   },
   "dependencies": {
+    "aws-amplify": "^4.3.29",
+    "aws-appsync": "^4.1.7",
     "core-js": "^3.9.1",
+    "cross-fetch": "^3.1.5",
+    "graphql-tag": "^2.12.6",
     "html2canvas": "^1.4.1",
     "regenerator-runtime": "^0.13.7"
   },
