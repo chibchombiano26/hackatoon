@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-undef */
 /*
  * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
@@ -31,6 +32,34 @@ Office.onReady((info) => {
   if (info.host === Office.HostType.PowerPoint) {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
+    document.getElementById("send-to-beacon").addEventListener("click", () => {
+      Office.context.document.getFileAsync(Office.FileType.Pdf, (result) => {
+        // @ts-ignore
+        if (result.status == "succeeded") {
+          const myFile = result.value;
+          myFile.getSliceAsync(0, (slice) => {
+            // @ts-ignore
+            if (slice.status == "succeeded") {
+              const fileContent = slice.value.data;
+              // byte array to blob
+              const blob = new Blob([fileContent], { type: "application/pdf" });
+              // download blob
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "myFile.pdf";
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+            }
+          });
+
+          myFile.closeAsync();
+        } else {
+          // app.showNotification("Error:", result.error.message);
+        }
+      });
+    });
 
     generateThumbnails();
   }
