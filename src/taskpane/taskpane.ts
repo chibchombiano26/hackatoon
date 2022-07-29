@@ -33,24 +33,26 @@ Office.onReady((info) => {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
     document.getElementById("send-to-beacon").addEventListener("click", () => {
-      Office.context.document.getFileAsync(Office.FileType.Pdf, (result) => {
+      Office.context.document.getFileAsync(Office.FileType.Compressed, (result) => {
         // @ts-ignore
         if (result.status == "succeeded") {
           const myFile = result.value;
           myFile.getSliceAsync(0, (slice) => {
             // @ts-ignore
             if (slice.status == "succeeded") {
-              const fileContent = slice.value.data;
-              // byte array to blob
-              const blob = new Blob([fileContent], { type: "application/pdf" });
-              // download blob
+              const fileContentArry = slice.value.data;
+
+              const fileContent = new Uint8Array(fileContentArry);
+              const file = new File([fileContent], "myFile.pptx", { type: "data:attachment/powerpoint" });
+
+              // file to blob and download
+              const blob = new Blob([fileContent], { type: "data:attachment/powerpoint" });
               const url = URL.createObjectURL(blob);
               const a = document.createElement("a");
               a.href = url;
-              a.download = "myFile.pdf";
-              document.body.appendChild(a);
+              a.download = "myFile.pptx";
               a.click();
-              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
             }
           });
 
