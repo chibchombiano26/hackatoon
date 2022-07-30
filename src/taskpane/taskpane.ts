@@ -9,10 +9,10 @@
 
 const awsmobile = {
   aws_project_region: "us-west-2",
-  aws_cognito_identity_pool_id: "us-west-2:8b29f52b-27f0-4bc1-97ca-041c594b0091",
+  aws_cognito_identity_pool_id: "us-west-2:8c9811f3-48b8-466d-817b-c2d7b9c04506",
   aws_cognito_region: "us-west-2",
-  aws_user_pools_id: "us-west-2_Gnmq0lww5",
-  aws_user_pools_web_client_id: "2tjjblup0ki30td1plcdmoc9ff",
+  aws_user_pools_id: "us-west-2_SUGA3muLW",
+  aws_user_pools_web_client_id: "9rsqpu5ie42e0gtrprfas5ikr",
   oauth: {},
   aws_cognito_username_attributes: ["EMAIL"],
   aws_cognito_social_providers: [],
@@ -24,27 +24,28 @@ const awsmobile = {
     passwordPolicyCharacters: [],
   },
   aws_cognito_verification_mechanisms: ["EMAIL"],
-  aws_appsync_graphqlEndpoint: "https://n6kzyc46ljff5cfbhx5he7uhj4.appsync-api.us-west-2.amazonaws.com/graphql",
+  aws_appsync_graphqlEndpoint: "https://xoikvv3jr5hrbjfzh5uf2usn3a.appsync-api.us-west-2.amazonaws.com/graphql",
   aws_appsync_region: "us-west-2",
   aws_appsync_authenticationType: "AMAZON_COGNITO_USER_POOLS",
-  aws_user_files_s3_bucket: "alucio-beacon-content104704-joseram",
+  aws_user_files_s3_bucket: "alucio-beacon-content195645-oavila",
   aws_user_files_s3_bucket_region: "us-west-2",
   aws_dynamodb_all_tables_region: "us-west-2",
   aws_dynamodb_table_schemas: [
     {
-      tableName: "ObjectAudit-joseram",
+      tableName: "ObjectAudit-oavila",
       region: "us-west-2",
     },
   ],
+
   Auth: {
-    identityPoolId: "us-west-2:8b29f52b-27f0-4bc1-97ca-041c594b0091", //REQUIRED - Amazon Cognito Identity Pool ID
+    identityPoolId: "us-west-2:8c9811f3-48b8-466d-817b-c2d7b9c04506", //REQUIRED - Amazon Cognito Identity Pool ID
     region: "us-west-2", // REQUIRED - Amazon Cognito Region
-    userPoolId: "us-west-2_Gnmq0lww5", //OPTIONAL - Amazon Cognito User Pool ID
-    userPoolWebClientId: "2tjjblup0ki30td1plcdmoc9ff", //OPTIONAL - Amazon Cognito Web Client ID
+    userPoolId: "us-west-2_SUGA3muLW", //OPTIONAL - Amazon Cognito User Pool ID
+    userPoolWebClientId: "9rsqpu5ie42e0gtrprfas5ikr", //OPTIONAL - Amazon Cognito Web Client ID
   },
   Storage: {
     AWSS3: {
-      bucket: "alucio-beacon-content104704-joseram", //REQUIRED -  Amazon S3 bucket name
+      bucket: "alucio-beacon-content195645-oavila", //REQUIRED -  Amazon S3 bucket name
       region: "us-west-2", //OPTIONAL -  Amazon service region
     },
   },
@@ -162,13 +163,13 @@ Amplify.configure(awsmobile);
 const docs = [
   {
     thumbnail: "../../assets/doc-1.png",
-    title: "Document 1",
+    title: "NCCN melanoma",
     description: "This is a document",
     url: "https://gist.githubusercontent.com/chibchombiano26/721ae21344f7ca71c3ed184c87aa1146/raw/027085a8d76a6818e2e4a68de2653fed2250a2eb/olympta",
   },
   {
     thumbnail: "../../assets/doc-2.png",
-    title: "Document 1",
+    title: "George Washington Carver",
     description: "This is a document",
     url: "https://gist.githubusercontent.com/chibchombiano26/8aa719d5e61bde40d249a3e49c691591/raw/4e4c54c1c5ec3fa405dea085f9ae680de06975a0/document%25202",
   },
@@ -186,8 +187,23 @@ Office.onReady(async (info) => {
   if (info.host === Office.HostType.PowerPoint) {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
+    document.getElementById("login-to-beacon").addEventListener(
+      "click",
+      async (e) => {
+        e.preventDefault();
+        var user = (<HTMLInputElement>document.getElementById("form2Example11")).value;
+        var pass = (<HTMLInputElement>document.getElementById("form2Example22")).value;
+        signIn(user, pass);
+      },
+      true
+    );
     document.getElementById("send-to-beacon").addEventListener("click", async () => {
       Office.context.document.getFileAsync(Office.FileType.Compressed, (result) => {
+        // jq("#send-to-beacon").attr("disabled", "disabled");
+        const button = document.getElementById("send-to-beacon");
+        const probressbar = document.getElementById("progress-bar");
+        button.setAttribute("disabled", "disabled");
+        probressbar.setAttribute("class", "visible");
         // @ts-ignore
         if (result.status == "succeeded") {
           const myFile = result.value;
@@ -198,6 +214,7 @@ Office.onReady(async (info) => {
 
               const fileContent = new Uint8Array(fileContentArry);
               const file = new File([fileContent], "myFile.pptx", { type: "data:attachment/powerpoint" });
+              // calculate progress bar to 100%
 
               const result = await Storage.put("myFile.pptx", fileContent, {
                 level: "private",
@@ -208,32 +225,51 @@ Office.onReady(async (info) => {
               });
               console.log(result);
               await createDocumentVersionFromS3(graphClient, result.key, "myFile.pptx");
+              button.removeAttribute("disabled");
+              probressbar.setAttribute("class", "invisible");
             }
           });
 
           myFile.closeAsync();
         } else {
-          // app.showNotification("Error:", result.error.message);
+          button.removeAttribute("disabled");
+          probressbar.setAttribute("class", "invisible");
         }
       });
     });
 
-    await signIn("alucioqa+josed-eclark@gmail.com", "TestUser321!");
+    // await signIn("alucioqa+oscar-jbuffetto@gmail.com", "TestUser321!");
     generateThumbnails();
   }
 });
 
 function generateThumbnails() {
-  docs.forEach((doc) => {
+  for (const doc of docs) {
     const node = document.createElement("div");
+    node.setAttribute("class", "card w-40 w-100 pt-2");
+    node.setAttribute("style", "width: 18rem;");
     const img = document.createElement("img");
     img.src = doc.thumbnail;
+    img.setAttribute("class", "card-img-top");
     img.onclick = () => {
       uploadFile(doc.url);
     };
+
+    const cardBody = document.createElement("div");
+    cardBody.setAttribute("class", "card-body");
+    const title = document.createElement("h5");
+    title.setAttribute("class", "card-title");
+    title.innerText = doc.title;
+    const description = document.createElement("p");
+    description.setAttribute("class", "card-text");
+    description.innerText = doc.description;
+    cardBody.appendChild(title);
+    cardBody.appendChild(description);
     node.appendChild(img);
+    node.appendChild(cardBody);
+
     document.getElementById("thumbnails").appendChild(node);
-  });
+  }
 }
 
 export async function run() {
@@ -252,11 +288,21 @@ const uploadFile = async (url: string) => {
   PowerPoint.createPresentation(text);
 };
 
+const logIn = async (e) => {
+  const blob = await fetch(
+    "https://gist.githubusercontent.com/chibchombiano26/8aa719d5e61bde40d249a3e49c691591/raw/4e4c54c1c5ec3fa405dea085f9ae680de06975a0/document%25202"
+  );
+  const text = await blob.text();
+  PowerPoint.createPresentation(text);
+};
+
 async function signIn(username, password) {
   try {
     const user = await Auth.signIn(username, password);
     graphClient = getGraphQLClientWithJWT(user.signInUserSession.idToken.jwtToken);
     console.log(user);
+    document.getElementById("login-form").setAttribute("style", "display: none");
+    document.getElementById("contentaddin").setAttribute("style", "display: block");
   } catch (error) {
     console.log("error signing in", error);
   }
